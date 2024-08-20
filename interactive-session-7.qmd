@@ -37,5 +37,191 @@ penguins_adelie <- penguins%>%
 # Wrangling continued- joins of different flavors
 ```{r}
 install.packages(datapasta)
+
+```
+
+```{r}
+animals <- tibble::tribble(
+  ~location,   ~species,  ~maturity,
+   "lagoon",   "bobcat",    "adult",
+    "bluff",   "coyote", "juvenile",
+    "creek",      "fox",    "adult",
+     "oaks", "squirrel", "juvenile",
+    "bluff",   "bobcat",    "adult"
+  )
+
+sites <- tibble::tribble(
+  ~location,      ~full_site_name, ~jurisdiction,
+    "beach",       "Goleta Beach",     "SB City",
+   "lagoon",        "UCSB Lagoon",        "UCSB",
+    "bluff",       "Ellwood Mesa",     "SB City",
+     "oaks", "Fremont Campground",        "USFS"
+  )
+
+# Full join example
+full_join_example <- full_join(animals, sites)
+
+# Left join
+left_join_example <- left_join(animals, sites)
+
+# Right join
+right_join_example <- right_join(animals, sites)
+
+# Inner join
+inner_join_example <- inner_join(animals, sites)
+
+#Filtering joins
+# semi joins
+semi_join_example <- semi_join(animals, sites)
+
+#another way to semi join
+
+semi_join_test <- animals%>%
+  filter(location %in% sites$location)
+
+# Anti join
+anti_join_example <- anti_join(animals, sites, by = "location")
+
+# by location- important to distinguish when there are multiple ways to join
+```
+
+```{r}
+sites <- sites %>%
+  rename(place = location)
+
+#if we change the name, then must distinguish the change in the "by" area, seen below
+
+test_join <- full_join(animals, sites, by = c("location" = "place"))
+```
+
+
+# Easier dates and times with {lubridate}
+```{r}
+library(tidyverse)
+library(lubridate)
+```
+
+
+```{r}
+my_date <- "03-05-1998"
+lubridate::mdy(my_date)
+
+my_date <- "11/7/2003"
+lubridate::mdy(my_date)
+
+my_date <- "08-Jun-1974"
+lubridate::dmy(my_date)
+
+my_date <- "19610518"
+lubridate::ymd(my_date)
+
+# Can it fail? Yes!
+
+lubridate::mdy("1950-08-30") # there's no month that's 1950
+
+lubridate::dmy("09/12/84")
+
+#Time zones
+time <- "2020-08-12 11:18"
+time <- lubridate::ymd_hm(time) # it will define this in UTC, need to make sure time zone is correct, always double check the data
+
+with_tz(time, "America/Los_Angeles")
+
+# pull just one element
+my_time <- lubridate::ymd_hms(time)
+week(my_time)
+hour(my_time)
+day(my_time)
+minute(my_time)
+second(my_time)
+year(my_time)
+
+#system time
+comp_time_start <- Sys.time()
+comp_time_end <- Sys.time()
+
+comp_time_end - comp_time_start
+
+#convert comp time to European/Belgrade time:
+with_tz(comp_time, "Europe/Belgrade")
+
+```
+
+#Data pieces as new columns
+
+```{r}
+urchin_counts <- tribble(
+  ~date, ~species, ~size_mm,
+  "10/3/2020", "purple", 55,
+  "10/4/2020", "red", 48,
+  "11/17/2020", "red", 67
+)
+
+# Need to fix the dates
+urchin_counts <- urchin_counts %>%
+  mutate(date = lubridate::mdy(date)) %>%
+  mutate(year = year(date),
+         month = month(date),
+         day = day(date))
+
+urchin_counts %>%
+  group_by(year) %>%
+  summarize(total = n())
+
+
+day_1 <- lubridate::ymd("2020-01-06")
+day_2 <- lubridate::ymd("2020-05-18")
+day_3 <- lubridate::ymd("2020-05-19")
+
+time_interval <- interval(day_1, day_2)
+
+time_length(time_interval, "week")
+
+time_length(time_interval, "year")
+```
+
+# Strings! Yay!
+
+```{r}
+my_string <- "Teddy loves eating salmon and socks"
+
+my_string %>% 
+  str_detect("piano")
+
+# Also works on vectors
+
+my_string <- c("burrito", "fish taco", "taco salad")
+my_string %>%
+  str_detect("fish")
+
+
+#better to use combining with other functions
+
+skywalkers <- starwars %>% 
+  filter(str_detect(name, "Skywalker"))
+
+
+# string replace
+firewalkers <- starwars %>%
+  mutate(name = str_replace(name, 
+                            pattern = "Sky", 
+                            replacement = "Fire"))
+
+# str_trim and str_squish
+feedback <- c(" I  ate   some nachos", "Wednesday morning   ")
+str_squish(feedback) #got rid of the extra spaces within each ""
+
+str_trim(feedback) # get's rid of spaces in the front and back, keeps the ones in the middle. 
+
+#Convert cases
+
+str_to_lower(feedback)
+
+str_to_upper(feedback)
+
+str_to_title(feedback)
+
+# Count matches in a string
+str_count(feedback, pattern = "nachos")
 ```
 
