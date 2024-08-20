@@ -13,5 +13,29 @@ library(tidyverse
         )
 library(palmerpenguins)
 library(lubridate)
+library(dplyr)
+```
+
+# Data wrangling refresher
+```{r}
+penguins_data <- palmerpenguins::penguins%>%
+  filter(island == c("Biscoe", "Dream"), na.rm = TRUE)%>%
+  select(-c("year", "sex")) %>%
+  mutate(body_mass_kg = body_mass_g / 1000)%>%
+  rename(location = island)
+```
+
+```{r}
+penguins_adelie <- penguins%>%
+  filter(species == "Adelie" & !is.na(flipper_length_mm))%>%
+  group_by(sex)%>%
+  summarize(mean_flipper_length = mean(flipper_length_mm, na.rm = TRUE),
+            sd_flipper_length = sd(flipper_length_mm, na.rm = TRUE),
+            sample_size = n())
+```
+
+# Wrangling continued- joins of different flavors
+```{r}
+install.packages(datapasta)
 ```
 
